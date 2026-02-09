@@ -33,6 +33,12 @@ app = FastAPI(
 )
 
 
+@app.get("/healthz")
+async def health_check():
+    """Health check endpoint for deployment platforms."""
+    return {"status": "healthy", "service": "sanctions-templates-api"}
+
+
 @app.post("/sanctions/eu")
 async def check_sanctions_eu(payload: NamePayload):
     full_name = payload.name.strip()
