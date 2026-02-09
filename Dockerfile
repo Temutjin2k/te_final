@@ -1,25 +1,17 @@
 # Use Python 3.11 slim as base image
 FROM python:3.11-slim
 
-# Install system dependencies including Chrome and Chrome driver
+# 1. Устанавливаем Chromium и драйвер из репозитория Debian.
+# Это заменяет и google-chrome-stable, и ручное скачивание chromedriver.
 RUN apt-get update && apt-get install -y \
-    wget \
-    gnupg \
-    unzip \
+    chromium \
+    chromium-driver \
     curl \
-    xvfb \
-    && wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - \
-    && sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list' \
-    && apt-get update \
-    && apt-get install -y google-chrome-stable \
+    unzip \
+    # xvfb нужен, только если ты используешь pyvirtualdisplay, 
+    # для headless режима в selenium он обычно не обязателен, но оставим на всякий случай
+    xvfb \ 
     && rm -rf /var/lib/apt/lists/*
-
-# Install Chrome Driver
-RUN CHROME_DRIVER_VERSION=`curl -sS chromedriver.storage.googleapis.com/LATEST_RELEASE` \
-    && wget -O /tmp/chromedriver.zip http://chromedriver.storage.googleapis.com/$CHROME_DRIVER_VERSION/chromedriver_linux64.zip \
-    && unzip /tmp/chromedriver.zip chromedriver -d /usr/local/bin/ \
-    && rm /tmp/chromedriver.zip \
-    && chmod +x /usr/local/bin/chromedriver
 
 # Set working directory
 WORKDIR /app
@@ -34,8 +26,10 @@ COPY . .
 # Set environment variables
 ENV PYTHONPATH=/app
 ENV DISPLAY=:99
-ENV CHROME_BIN=/usr/bin/google-chrome
-ENV CHROMEDRIVER_PATH=/usr/local/bin/chromedriver
+
+# Важно: указываем правильные пути для Chromium
+ENV CHROME_BIN=/usr/bin/chromium
+ENV CHROMEDRIVER_PATH=/usr/bin/chromedriver
 
 # Expose port
 EXPOSE 8080
