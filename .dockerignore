@@ -1,0 +1,47 @@
+# Git
+.git
+.gitignore
+
+# Docker
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# Python
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.Python
+env
+pip-log.txt
+pip-delete-this-directory.txt
+.pytest_cache
+.coverage
+
+# Virtual environments
+venv
+env
+ENV
+env.bak
+venv.bak
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Railway/deployment
+.env.local
+.env.railway
+railway.toml
+
+# Temporary files
+*.log
+*.tmp
+temp/

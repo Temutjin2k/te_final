@@ -44,6 +44,7 @@ class BaseChromeParser:
             if self.headless:
                 chrome_options.add_argument("--headless")
             
+            chrome_options.add_argument("--headless=new")
             # Common Chrome options for server environments
             chrome_options.add_argument("--no-sandbox")
             chrome_options.add_argument("--disable-dev-shm-usage")
@@ -67,20 +68,27 @@ class BaseChromeParser:
             chrome_options.add_argument("--user-agent=Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
             
             # Set Chrome binary path if available
-            import os
             chrome_bin = os.environ.get('CHROME_BIN')
             if chrome_bin:
                 chrome_options.binary_location = chrome_bin
             
+            # Set chromedriver path if available
+            chromedriver_path = os.environ.get('CHROMEDRIVER_PATH')
+            
             # Try to create WebDriver
             try:
-                if WEBDRIVER_MANAGER_AVAILABLE:
+                if chromedriver_path and os.path.exists(chromedriver_path):
+                    # Use specified chromedriver path (Docker environment)
+                    service = Service(chromedriver_path)
+                    self.driver = webdriver.Chrome(service=service, options=chrome_options)
+                elif WEBDRIVER_MANAGER_AVAILABLE:
                     # Use webdriver-manager for automatic driver management
                     service = Service(ChromeDriverManager().install())
                     self.driver = webdriver.Chrome(service=service, options=chrome_options)
                 else:
-                    # Try with system Chrome/Chromium first
+                    # Try system chromedriver
                     self.driver = webdriver.Chrome(options=chrome_options)
+                    
             except WebDriverException as first_error:
                 self.logger.warning(f"First attempt failed: {first_error}")
                 # Fallback: try with explicit service
