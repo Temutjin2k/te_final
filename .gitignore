@@ -1,0 +1,17 @@
+# Python
+__pycache__/
+*.pyc
+venv/
+.venv/
+
+# Project folders
+sanctions/
+tests/
+
+# Generated / temp artifacts
+*.json
+*.xlsx
+*.md
+*.txt
+*.png
+
