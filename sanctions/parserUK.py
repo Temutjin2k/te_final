@@ -29,6 +29,21 @@ class ParserUK:
                  logger: Optional[logging.Logger] = None):
         self.page_size = page_size
         self.min_score = min_score
+        self.use_selenium_for_pagecount = use_selenium_for_pagecount
+        self.max_workers = max_workers
+        self.logger = logger or logging.getLogger(__name__)
+        
+        # Setup session with retries
+        self.session = requests.Session()
+        retry_strategy = Retry(
+            total=3,
+            status_forcelist=[429, 500, 502, 503, 504],
+            method_whitelist=["HEAD", "GET", "OPTIONS", "POST"]
+        )
+        adapter = HTTPAdapter(max_retries=retry_strategy)
+        self.session.mount("http://", adapter)
+        self.session.mount("https://", adapter)
+        self.min_score = min_score
         self.use_selenium_for_pagecount = use_selenium_for_pagecount and SELENIUM_AVAILABLE
         self.max_workers = max_workers
         self.logger = logger or logging.getLogger(__name__)

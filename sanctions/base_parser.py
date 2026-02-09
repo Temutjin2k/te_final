@@ -26,7 +26,15 @@ class BaseChromeParser:
         self.timeout = timeout
         self.driver = None
         self.logger = logging.getLogger(self.__class__.__name__)
-        self._setup_driver()
+        self.chrome_available = False
+        
+        # Try to setup driver, but don't fail if Chrome is not available
+        try:
+            self._setup_driver()
+            self.chrome_available = True
+        except Exception as e:
+            self.logger.warning(f"Chrome WebDriver not available: {e}")
+            self.chrome_available = False
     
     def _setup_driver(self):
         """Set up Chrome WebDriver with appropriate options."""
@@ -148,6 +156,8 @@ class BaseChromeParser:
     
     def exists(self, name: str) -> bool:
         """Check if name exists in sanctions list. To be implemented by subclasses."""
+        if not self.chrome_available:
+            raise RuntimeError("Chrome WebDriver is not available in this environment")
         raise NotImplementedError("Subclasses must implement exists() method")
     
     def fetch(self, name: str) -> tuple:
@@ -156,4 +166,8 @@ class BaseChromeParser:
         Returns tuple: (found: bool, content_bytes: bytes, filename: str, media_type: str)
         To be implemented by subclasses.
         """
+        if not self.chrome_available:
+            # Return a default response when Chrome is not available
+            error_msg = f"Sanctions checking is currently unavailable (Chrome WebDriver not found). Please try again later."
+            return (False, error_msg.encode('utf-8'), "error.txt", "text/plain")
         raise NotImplementedError("Subclasses must implement fetch() method")

@@ -19,15 +19,26 @@ try:
     SANCTIONS_AVAILABLE = True
     logger.info("Sanctions parsers loaded successfully")
 except ImportError as e:  # pragma: no cover
-    # Fallback dummy parsers for environments without the sanctions package
-    logger.warning(f"Sanctions parsers are not available: {e}")
-    
-    class _MissingSanctions:
-        def __init__(self, *args, **kwargs):
-            raise NotImplementedError("Sanctions parsers are not available in this environment.")
+    logger.warning(f"Browser-based sanctions parsers not available: {e}")
+    # Try to use API-based fallbacks
+    try:
+        from sanctions.api_parsers import (
+            APIBasedSanctionsEU as SanctionsEU,
+            APIBasedSanctionsOFAC as OfacParser,
+            APIBasedSanctionsUN as UnParser
+        )
+        from sanctions.parserUK import ParserUK as UkParser  # UK parser works via API
+        SANCTIONS_AVAILABLE = True
+        logger.info("Using API-based sanctions parsers as fallback")
+    except ImportError:
+        # Final fallback dummy parsers
+        class _MissingSanctions:
+            def __init__(self, *args, **kwargs):
+                raise NotImplementedError("Sanctions parsers are not available in this environment.")
 
-    SanctionsEU = OfacParser = UkParser = UnParser = _MissingSanctions
-    SANCTIONS_AVAILABLE = False
+        SanctionsEU = OfacParser = UkParser = UnParser = _MissingSanctions
+        SANCTIONS_AVAILABLE = False
+        logger.error("No sanctions parsers available")
 
 
 app = FastAPI(
