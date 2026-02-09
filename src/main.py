@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse, StreamingResponse
 from docxtpl import DocxTemplate
 import io
@@ -7,12 +7,17 @@ import logging
 
 from src.services import NamePayload
 
+# Настройка логирования
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
+logger = logging.getLogger(__name__)
+
 try:
     from sanctions.parserEU import SanctionsEU
     from sanctions.parserOFAC import ParserOFAC as OfacParser
     from sanctions.parserUK import ParserUK as UkParser
     from sanctions.parserUN import ParserUN as UnParser
     SANCTIONS_AVAILABLE = True
+    logger.info("Sanctions parsers loaded successfully")
 except ImportError as e:  # pragma: no cover
     # Fallback dummy parsers for environments without the sanctions package
     logger.warning(f"Sanctions parsers are not available: {e}")
@@ -23,11 +28,6 @@ except ImportError as e:  # pragma: no cover
 
     SanctionsEU = OfacParser = UkParser = UnParser = _MissingSanctions
     SANCTIONS_AVAILABLE = False
-
-
-# Настройка логирования
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
-logger = logging.getLogger(__name__)
 
 
 app = FastAPI(

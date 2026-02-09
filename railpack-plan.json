@@ -1,0 +1,32 @@
+{
+  "name": "te_final",
+  "description": "FastAPI application for sanctions checking and document template processing",
+  "version": "1.0.0",
+  "engines": {
+    "python": "3.12.x"
+  },
+  "build": {
+    "python": {
+      "version": "3.12",
+      "packages": [
+        "libxml2-dev",
+        "libxslt1-dev", 
+        "zlib1g-dev",
+        "gcc",
+        "google-chrome-stable"
+      ]
+    },
+    "buildpacks": [
+      "heroku/python",
+      "https://github.com/heroku/heroku-buildpack-google-chrome.git"
+    ]
+  },
+  "scripts": {
+    "build": "pip install --upgrade pip && pip install -r requirements.txt",
+    "start": "python app.py"
+  },
+  "env": {
+    "CHROME_BIN": "/app/.chromedriver/bin/chromedriver",
+    "GOOGLE_CHROME_BIN": "/app/.chrome-for-testing/chrome-linux64/chrome"
+  }
+}

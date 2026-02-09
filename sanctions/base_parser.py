@@ -40,13 +40,29 @@ class BaseChromeParser:
             chrome_options.add_argument("--no-sandbox")
             chrome_options.add_argument("--disable-dev-shm-usage")
             chrome_options.add_argument("--disable-gpu")
+            chrome_options.add_argument("--disable-web-security")
+            chrome_options.add_argument("--disable-features=VizDisplayCompositor")
             chrome_options.add_argument("--window-size=1920,1080")
             chrome_options.add_argument("--disable-blink-features=AutomationControlled")
+            chrome_options.add_argument("--disable-extensions")
+            chrome_options.add_argument("--no-first-run")
+            chrome_options.add_argument("--disable-default-apps")
+            chrome_options.add_argument("--disable-background-timer-throttling")
+            chrome_options.add_argument("--disable-backgrounding-occluded-windows")
+            chrome_options.add_argument("--disable-renderer-backgrounding")
+            chrome_options.add_argument("--disable-infobars")
+            chrome_options.add_argument("--remote-debugging-port=9222")
             chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
             chrome_options.add_experimental_option('useAutomationExtension', False)
             
             # Set user agent
-            chrome_options.add_argument("--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
+            chrome_options.add_argument("--user-agent=Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
+            
+            # Set Chrome binary path if available
+            import os
+            chrome_bin = os.environ.get('CHROME_BIN')
+            if chrome_bin:
+                chrome_options.binary_location = chrome_bin
             
             # Try to create WebDriver
             try:
@@ -57,17 +73,33 @@ class BaseChromeParser:
                 else:
                     # Try with system Chrome/Chromium first
                     self.driver = webdriver.Chrome(options=chrome_options)
-            except WebDriverException:
+            except WebDriverException as first_error:
+                self.logger.warning(f"First attempt failed: {first_error}")
                 # Fallback: try with explicit service
                 try:
                     service = Service()
                     self.driver = webdriver.Chrome(service=service, options=chrome_options)
-                except WebDriverException as e:
-                    self.logger.error(f"Failed to initialize Chrome WebDriver: {e}")
-                    raise RuntimeError(
-                        "Chrome WebDriver could not be initialized. "
-                        "Please ensure Chrome/Chromium is installed and accessible."
-                    )
+                except WebDriverException as second_error:
+                    self.logger.error(f"Second attempt failed: {second_error}")
+                    # Final fallback: try to find chrome binary manually
+                    try:
+                        for chrome_path in ['/usr/bin/google-chrome-stable', '/usr/bin/google-chrome', '/usr/bin/chromium-browser']:
+                            if os.path.exists(chrome_path):
+                                chrome_options.binary_location = chrome_path
+                                service = Service()
+                                self.driver = webdriver.Chrome(service=service, options=chrome_options)
+                                break
+                        else:
+                            raise RuntimeError(
+                                "Chrome WebDriver could not be initialized. "
+                                "Chrome binary not found or chromedriver incompatible."
+                            )
+                    except Exception as final_error:
+                        self.logger.error(f"All attempts failed: {final_error}")
+                        raise RuntimeError(
+                            "Chrome WebDriver could not be initialized. "
+                            "Please ensure Chrome/Chromium is installed and accessible."
+                        )
             
             # Set implicit wait
             self.driver.implicitly_wait(10)

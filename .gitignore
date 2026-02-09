@@ -4,9 +4,3 @@ __pycache__/
 venv/
 .venv/
 
-
-# Generated / temp artifacts
-*.json
-*.xlsx
-*.png
-
