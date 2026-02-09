@@ -34,6 +34,18 @@ class SanctionsEU(BaseChromeParser):
 
     def fetch(self, name: str):
         """Return tuple: (found: bool, content_bytes: bytes, filename: str, media_type: str)"""
+        if not self.chrome_available or self.driver is None:
+            # Return API-based fallback response
+            import json
+            message = {
+                "status": "unavailable",
+                "message": "EU sanctions checking requires browser automation which is not available in this environment.",
+                "searched_name": name,
+                "suggestion": "Please check manually at https://www.sanctionsmap.eu/"
+            }
+            content = json.dumps(message, indent=2, ensure_ascii=False)
+            return (False, content.encode('utf-8'), f"eu_sanctions_unavailable_{name}.json", "application/json")
+            
         try:
             self.driver.get(self.url)
             self.driver.implicitly_wait(5)

@@ -28,6 +28,32 @@ class ParserUN(BaseChromeParser):
         - Always returns the HTML list file as bytes so it can be downloaded
         - "found" is computed by checking if the provided name appears near a "NAME:" label
         """
+        if not self.chrome_available or self.driver is None:
+            # Try direct HTTP request as fallback
+            try:
+                response = requests.get("https://main.un.org/securitycouncil/en/content/un-sc-consolidated-list", timeout=30)
+                response.raise_for_status()
+                
+                # Simple text search
+                found = name.lower() in response.text.lower()
+                
+                import json
+                result = {
+                    "status": "partial_check",
+                    "found": found,
+                    "searched_name": name,
+                    "message": f"Basic text search {'found' if found else 'did not find'} the name '{name}' in UN sanctions list.",
+                    "note": "This is a simple text search. For detailed verification, please check manually.",
+                    "url": "https://main.un.org/securitycouncil/en/content/un-sc-consolidated-list"
+                }
+                
+                content = json.dumps(result, indent=2, ensure_ascii=False)
+                return (found, content.encode('utf-8'), f"un_sanctions_check_{name}.json", "application/json")
+                
+            except Exception as e:
+                error_msg = f"Error checking UN sanctions for '{name}': {str(e)}"
+                return (False, error_msg.encode('utf-8'), "error.txt", "text/plain")
+        
         try:
             self.driver.get(self.url)
             self.driver.implicitly_wait(5)

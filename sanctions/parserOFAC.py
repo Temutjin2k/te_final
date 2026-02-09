@@ -33,6 +33,18 @@ class ParserOFAC(BaseChromeParser):
             self._cleanup()
 
     def fetch(self, name: str):
+        if not self.chrome_available or self.driver is None:
+            # Return API-based fallback response
+            import json
+            message = {
+                "status": "unavailable",
+                "message": "OFAC sanctions checking requires browser automation which is not available in this environment.",
+                "searched_name": name,
+                "suggestion": "Please check manually at https://sanctionssearch.ofac.treas.gov"
+            }
+            content = json.dumps(message, indent=2, ensure_ascii=False)
+            return (False, content.encode('utf-8'), f"ofac_sanctions_unavailable_{name}.json", "application/json")
+            
         try:
             self.driver.get(self.URL)
             tbl = self._wait(EC.visibility_of_element_located((By.CLASS_NAME, "MainTable")))
