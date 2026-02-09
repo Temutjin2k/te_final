@@ -1,28 +1,29 @@
 # FastAPI and web framework dependencies
-fastapi==0.104.1
-uvicorn[standard]==0.24.0
+fastapi>=0.104.0,<0.109.0
+uvicorn[standard]>=0.24.0,<0.26.0
 
-# Data validation and settings
-pydantic==2.5.0
-pydantic-settings==2.1.0
+# Data validation and settings (use newer versions compatible with Python 3.13)
+pydantic>=2.6.0,<3.0.0
+pydantic-settings>=2.2.0,<3.0.0
 
 # Document processing
-docxtpl==0.16.7
-python-docx==1.1.0
+docxtpl>=0.16.0,<1.0.0
+python-docx>=1.1.0,<2.0.0
 
 # DOCX template dependencies
-Jinja2==3.1.2
-lxml==4.9.3
+Jinja2>=3.1.0,<4.0.0
+# Use lxml with better Python 3.13 compatibility
+lxml>=5.0.0,<6.0.0; python_version >= "3.9"
 
 # Environment management
-python-dotenv==1.0.0
+python-dotenv>=1.0.0,<2.0.0
 
 # Optional: if sanctions parsers are available as packages
 # sanctions-parser>=1.0.0  # Uncomment if available
 
 # Development and testing
-pytest==7.4.3
-pytest-asyncio==0.21.1
-httpx==0.25.2  # For testing FastAPI
-black==23.11.0
-flake8==6.1.0
+pytest>=7.4.0,<8.0.0
+pytest-asyncio>=0.23.0,<1.0.0
+httpx>=0.25.0,<1.0.0  # For testing FastAPI
+black>=23.0.0,<25.0.0
+flake8>=6.0.0,<8.0.0
