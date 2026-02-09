@@ -11,7 +11,5 @@ tests/
 # Generated / temp artifacts
 *.json
 *.xlsx
-*.md
-*.txt
 *.png
 
