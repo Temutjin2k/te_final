@@ -1,0 +1,36 @@
+# Alternative requirements.txt for environments that need fallback versions
+# Use this if the main requirements.txt fails due to package compatibility issues
+
+# FastAPI and web framework dependencies
+fastapi==0.108.0
+uvicorn[standard]==0.25.0
+
+# Data validation and settings - older stable versions
+pydantic==2.4.2
+pydantic-settings==2.0.3
+
+# Document processing - use older lxml that has pre-built wheels
+docxtpl==0.16.7
+python-docx==1.1.0
+Jinja2==3.1.2
+lxml==4.9.2  # Older version with better wheel availability
+
+# Environment management
+python-dotenv==1.0.0
+
+# Sanctions parser dependencies
+selenium==4.15.2
+requests==2.31.0
+beautifulsoup4==4.12.2
+rapidfuzz==3.5.2
+
+# Development and testing
+pytest==7.4.3
+pytest-asyncio==0.21.1
+httpx==0.25.2
+black==23.11.0
+flake8==6.1.0
+
+# Additional dependencies that might be needed
+six==1.16.0
+setuptools>=65.0.0

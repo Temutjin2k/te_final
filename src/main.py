@@ -12,13 +12,17 @@ try:
     from sanctions.parserOFAC import ParserOFAC as OfacParser
     from sanctions.parserUK import ParserUK as UkParser
     from sanctions.parserUN import ParserUN as UnParser
-except ImportError:  # pragma: no cover
+    SANCTIONS_AVAILABLE = True
+except ImportError as e:  # pragma: no cover
     # Fallback dummy parsers for environments without the sanctions package
+    logger.warning(f"Sanctions parsers are not available: {e}")
+    
     class _MissingSanctions:
         def __init__(self, *args, **kwargs):
             raise NotImplementedError("Sanctions parsers are not available in this environment.")
 
     SanctionsEU = OfacParser = UkParser = UnParser = _MissingSanctions
+    SANCTIONS_AVAILABLE = False
 
 
 # Настройка логирования
